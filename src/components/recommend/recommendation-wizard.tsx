@@ -331,7 +331,12 @@ export function RecommendationWizard() {
                       <button 
                         onClick={() => {
                           setShowAll(true);
-                          track("results_expanded", { mode: "MEDIUM" });
+                          track("results_expanded", { 
+                            mode: "MEDIUM",
+                            useCase: formData.useCase,
+                            confidenceLevel: metadata?.confidenceLevel,
+                            resultCount: results.length
+                          });
                         }}
                         className="text-[10px] uppercase tracking-[0.2em] text-brand-text/40 hover:text-brand-signal transition-colors font-mono py-4 border-b border-brand-text/10"
                       >

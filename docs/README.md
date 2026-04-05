@@ -17,6 +17,7 @@ If you are new to the project, start with the overview docs first, then move int
 |---|---|---|
 | [`../README.md`](../README.md) | Anyone | Product overview, positioning, setup, operating model |
 | [`whitepaper-deterministic-engine.md`](./whitepaper-deterministic-engine.md) | Investors, Founders | Strategic positioning, the "decision over search" philosophy |
+| [`technical-whitepaper-v1.md`](./technical-whitepaper-v1.md) | Technical Evaluators | **Full System Spec.** Rigorous design, invariants, and failure modes |
 | [`architecture.md`](./architecture.md) | Engineers, reviewers, investors | Internal mechanics, execution flows, guarantees, invariants |
 | [`data-model.md`](./data-model.md) | Engineers, DB operators | Full schema, ERD, SQL, RLS intent, indexes, lifecycle rules |
 | [`api.md`](./api.md) | Engineers, integrators | All route handlers, payload contracts, auth boundaries, failure modes |
@@ -40,10 +41,11 @@ If you are new to the project, start with the overview docs first, then move int
 ### 2. Engineering Onboarding Path
 *Focus: Technical implementation, boundaries, and codebase navigation.*
 
-1.  [`architecture.md`](./architecture.md) — System layering and request flows
-2.  [`data-model.md`](./data-model.md) — Relational truth and RLS guardrails
-3.  [`api.md`](./api.md) — Payload contracts and error handling
-4.  [`scoring-engine.md`](./scoring-engine.md) — The decision logic spec
+1.  [`technical-whitepaper-v1.md`](./technical-whitepaper-v1.md) — System layering and request flows
+2.  [`architecture.md`](./architecture.md) — System architecture details
+3.  [`data-model.md`](./data-model.md) — Relational truth and RLS guardrails
+4.  [`api.md`](./api.md) — Payload contracts and error handling
+5.  [`scoring-engine.md`](./scoring-engine.md) — The decision logic spec
 
 ---
 

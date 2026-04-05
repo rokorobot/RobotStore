@@ -25,6 +25,7 @@ export type FunnelEvent =
   | "cta_clicked"                // click on specific CTA variant
   | "cta_completed"              // down-stream checkout/quote success
   | "persuasive_reason_exposed"  // dynamic explanation presented to user
+  | "results_expanded"           // MEDIUM mode escape hatch click
   | "checkout_redirected"        // redirection to Stripe/External checkout
   | "refinement_applied";        // click on uncertainty-reduction guidance signal
 

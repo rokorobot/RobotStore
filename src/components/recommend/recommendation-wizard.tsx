@@ -23,7 +23,12 @@ export function RecommendationWizard() {
   const [loading, setLoading] = useState(false);
   const [scanPhase, setScanPhase] = useState(0);
   const [results, setResults] = useState<RecommendationResult[]>([]);
-  const [metadata, setMetadata] = useState<{ confidenceGap: number; confidenceLevel: "HIGH" | "MEDIUM" | "LOW" } | null>(null);
+  const [metadata, setMetadata] = useState<{ 
+    confidenceGap: number; 
+    confidenceLevel: "HIGH" | "MEDIUM" | "LOW";
+    uncertaintyReason?: string;
+    refinementSignals?: import("@/types/recommend").RefinementSignal[];
+  } | null>(null);
   const [showAll, setShowAll] = useState(false);
 
   const SCAN_PHASES = [
@@ -278,11 +283,12 @@ export function RecommendationWizard() {
                   {/* LOW CONFIDENCE GUIDANCE */}
                   {metadata?.confidenceLevel === "LOW" && (
                     <ConfidenceGuidancePanel 
-                      uncertaintyReason="Multiple configurations match your inputs with near-parity scores."
-                      refinements={[
-                        { key: "scale", title: "Specify Deployment Scale", description: "Define exact node count (1 vs swarm).", actionLabel: "SELECT SCALE" },
-                        { key: "budget", title: "Tighten Budget Band", description: "Narrowing the range resolves parity.", actionLabel: "ADJUST BUDGET" }
-                      ]}
+                      uncertaintyReason={metadata?.uncertaintyReason}
+                      refinements={metadata?.refinementSignals}
+                      onRefine={(key) => {
+                        // Logic to back-step or refine
+                        setStep(1); 
+                      }}
                     />
                   )}
 
@@ -295,8 +301,8 @@ export function RecommendationWizard() {
                     metadata?.confidenceLevel === "MEDIUM" ? "md:grid-cols-2" : "md:grid-cols-1"
                   } gap-6`}>
                     {results.map((res: any, idx) => {
-                      const isSuppressed = metadata?.confidenceLevel === "MEDIUM" && idx > 1 && !showAll;
-                      const isSecondaryInHigh = metadata?.confidenceLevel === "HIGH" && idx > 0;
+                      const isSuppressed = metadata?.confidenceLevel === "MEDIUM" && idx >= 2 && !showAll;
+                      const isSecondaryInHigh = metadata?.confidenceLevel === "HIGH" && idx >= 1;
                       
                       if (isSuppressed || isSecondaryInHigh) return null;
 
@@ -318,6 +324,21 @@ export function RecommendationWizard() {
                       );
                     })}
                   </div>
+
+                  {/* View All Escape Hatch (MEDIUM Mode) */}
+                  {metadata?.confidenceLevel === "MEDIUM" && !showAll && results.length > 2 && (
+                    <div className="flex justify-center pt-4">
+                      <button 
+                        onClick={() => {
+                          setShowAll(true);
+                          track("results_expanded", { mode: "MEDIUM" });
+                        }}
+                        className="text-[10px] uppercase tracking-[0.2em] text-brand-text/40 hover:text-brand-signal transition-colors font-mono py-4 border-b border-brand-text/10"
+                      >
+                        [ VIEW ALL RANKED OPTIONS ]
+                      </button>
+                    </div>
+                  )}
 
                   {/* MEDIUM MODE ESCAPE HATCH */}
                   {metadata?.confidenceLevel === "MEDIUM" && results.length > 2 && !showAll && (

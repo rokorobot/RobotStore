@@ -9,11 +9,20 @@ import {
   scoreAvailability 
 } from "./scoring";
 import { buildRecommendationReasons } from "./explanations";
+import { deriveRefinementSignals } from "./reasons";
 
 export function getRecommendations(
   units: Unit[],
   input: RecommendationInput
-): { results: RecommendationResult[]; metadata: { confidenceGap: number; confidenceLevel: "HIGH" | "MEDIUM" | "LOW" } } {
+): { 
+  results: RecommendationResult[]; 
+  metadata: { 
+    confidenceGap: number; 
+    confidenceLevel: "HIGH" | "MEDIUM" | "LOW";
+    uncertaintyReason?: string;
+    refinementSignals?: import("@/types/recommend").RefinementSignal[];
+  } 
+} {
   // 1. Initial Soft Filtering
   const eligible = units;
 
@@ -76,11 +85,23 @@ export function getRecommendations(
   if (gap >= 15) level = "HIGH";
   else if (gap >= 5) level = "MEDIUM";
 
+  // 5. Build Uncertainty Signals (if LOW)
+  let uncertaintyReason = "";
+  let refinementSignals: import("@/types/recommend").RefinementSignal[] = [];
+
+  if (level === "LOW") {
+    const derived = deriveRefinementSignals(sorted, input);
+    uncertaintyReason = derived.uncertaintyReason;
+    refinementSignals = derived.signals;
+  }
+
   return {
     results: sorted,
     metadata: {
       confidenceGap: gap,
-      confidenceLevel: level
+      confidenceLevel: level,
+      uncertaintyReason,
+      refinementSignals
     }
   };
 }

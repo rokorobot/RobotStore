@@ -1,4 +1,4 @@
-import { RecommendationInput, RecommendationResult, PersuasiveReason } from "@/types/recommend";
+import { RecommendationInput, RecommendationResult, PersuasiveReason, RefinementSignal } from "@/types/recommend";
 
 /**
  * Generates a grounded, evidence-backed persuasive reason for a recommendation.
@@ -73,4 +73,67 @@ export function generatePersuasiveReason(
     dominantDimension: dominant.key,
     reasonType
   };
+}
+
+/**
+ * Derives specific refinement signals based on result distribution and input.
+ * Answers: "Why is confidence low here?"
+ */
+export function deriveRefinementSignals(
+  results: RecommendationResult[],
+  input: RecommendationInput
+): { uncertaintyReason: string; signals: RefinementSignal[] } {
+  const top = results[0];
+  const runnerUp = results[1];
+  const signals: RefinementSignal[] = [];
+  let uncertaintyReason = "";
+
+  if (!top || !runnerUp) return { uncertaintyReason, signals };
+
+  const gap = top.score - runnerUp.score;
+
+  // 1. Score Parity (Tight cluster at the top)
+  if (gap < 3) {
+    uncertaintyReason = "Multiple configurations match your requirements with near-parity scores.";
+    signals.push({
+      key: "environment",
+      title: "Navigation Context",
+      description: "Specify precision obstacles or topography constraints.",
+      actionLabel: "Refine Environment"
+    });
+  }
+
+  // 2. Budget Ambiguity (Top results span divergent budget expectations)
+  const budgetDiff = Math.abs(top.breakdown.budget - runnerUp.breakdown.budget);
+  if (budgetDiff > 10) {
+    uncertaintyReason = uncertaintyReason || "Cost/Performance balance is ambiguous across your inputs.";
+    signals.push({
+      key: "budget",
+      title: "Budget Band",
+      description: "Tighten your budget window to improve unit separation.",
+      actionLabel: "Narrow Budget"
+    });
+  }
+
+  // 3. Deployment Scaling (Low specificity on fleet vs single)
+  if (top.breakdown.deploymentScale < 5 && runnerUp.breakdown.deploymentScale < 5) {
+     signals.push({
+      key: "scale",
+      title: "Fleet Scale",
+      description: "Define if this is a single node or a multi-unit deployment.",
+      actionLabel: "Set Scale"
+    });
+  }
+
+  // Fallback
+  if (signals.length === 0) {
+    signals.push({
+      key: "purchaseMode",
+      title: "Purchase Timing",
+      description: "Clarify if you require immediate shipping or quote consultation.",
+      actionLabel: "Update Preference"
+    });
+  }
+
+  return { uncertaintyReason, signals };
 }
